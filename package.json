@@ -1,5 +1,5 @@
 {
-  "name": "jquery-enter-leave",
+  "name": "enter-leave",
   "version": "0.1.0",
   "description": "Simplifies animating elements added or removed to the DOM. Greatly inspired by Angular's ngAnimate.",
   "main": "enter-leave.js",
@@ -8,10 +8,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lohfu/jquery-enter-leave.git"
+    "url": "git+https://github.com/lohfu/enter-leave.git"
   },
   "keywords": [
-    "jQuery",
     "CSS",
     "animation",
     "transition"
@@ -23,7 +22,10 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lohfu/jquery-enter-leave/issues"
+    "url": "https://github.com/lohfu/enter-leave/issues"
   },
-  "homepage": "https://github.com/lohfu/jquery-enter-leave"
+  "homepage": "https://github.com/lohfu/enter-leave",
+  "dependencies": {
+    "fxq": "0.0.1"
+  }
 }

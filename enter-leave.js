@@ -2,13 +2,19 @@
 
 var transitionend = 'transitionend';
 
-$(document).on(transitionend, '.animate.active', function() {
-	$(this).dequeue();
+var fxq = require('fxq');
+
+document.addEventListener(transitionend, function(e) {
+	if (e.target.matches('.animate.active')) {
+		e.stopPropagation();
+		fxq.dequeue(e.target);
+	}
 });
 
 function transition(className, options, complete) {
 	options = options || {};
 
+	// TODO perhaps className should be an array of classes
 	if (options.className)
 		className += ' ' + options.className;
 
@@ -21,45 +27,49 @@ function transition(className, options, complete) {
 
 		finish: function() {
 			if (complete) complete.call(this);
+
 			stop();
-			$(this).removeClass('animate active').css({ height: '' }).dequeue();
+
+			this.classList.remove('animate', 'active');
+			this.style.height = '';
+			
+			fxq.dequeue(this);
 		}
 	};
 }
 
 function animate(className, options) {
-	// The extra offsetHeight is required to fix IE bug. if there is button in the page,
-	// the page will be placed at it's end location, then aniamted out until the enter active class is added.
-	//
-	// this bug can apparently be sorted by setting the start position in .animate instead of .page
-	//$(this).addClass('enter');
+	var self = this;
 
-	// force redraw
-	//this.offsetHeight;
-	var elem = $(this).addClass('animate ' + className);
+	this.classList.add.apply(this.classList, className.split(' ').concat('animate'));
 
 	// force redraw
 	this.offsetHeight;
 
 	var timeout = setTimeout(function() {
-		elem.addClass('active');
+		self.classList.add('active');
+		//self.addClass('active');
 
-		var duration = parseFloat(elem.css('transition-duration'));
+		var duration = parseFloat(window.getComputedStyle(self).getPropertyValue('transition-duration'));
 
 		timeout = setTimeout(function() {
 			// finish animation if we are still waiting for transitionend
 
-			if (elem.is('.animate.active')) elem.dequeue();
+			//if (elem.is('.animate.active'))
+			if (self.matches('.animate.active'))
+				fxq.dequeue(self);
 		}, duration > 0 ? duration * 1100 : 0);
 	});
 
 	return function() {
 		clearTimeout(timeout);
-		elem.removeClass(className);
+		// TODO maybe split(' ') and apply?
+		self.classList.remove.apply(self.classList, className.split(' '));
+		//elem.removeClass(className);
 	};
 }
 
-$.fn.extend({
+module.exports = {
 
 	toggle: function(options) {
 		if(this.hasClass('hidden') || this.hasClass('leave'))
@@ -68,37 +78,41 @@ $.fn.extend({
 			this.hide(options);
 	},
 
-	enter: function(element, options, complete) {
+	enter: function(element, targetElement, options, complete) {
 		options = options || {};
 
 		var enter = transition('enter', options, complete);
 
-		return this.queue(function() {
-			$(element)[options.method || 'append'](this);
+		fxq.queue(element, function() {
+			// TODO implement different insertiong methods
+			targetElement.appendChild(element);
 
-			$(this).removeClass('hidden');
+			element.classList.remove('hidden');
 
 			if (options.animateHeight)
-				$(this).css('height', this.scrollHeight);
+				element.style.height = element.scrollHeight;
 
-			enter.start.apply(this, arguments);
-		}).queue(enter.finish);
+			enter.start.apply(element, arguments);
+		});
+		
+		fxq.queue(element, enter.finish);
 	},
 
-	leave: function(options, complete) {
+	leave: function(element, options, complete) {
 
 		var leave = transition('leave', options, complete || function() {
 			// remove element when transition ends
-			$(this).remove();
+			element.parentNode.removeChild(element);
 		});
 
-		this.finish();
+		fxq.finish(element);
 
-		if (options && options.animateHeight && !this.hasClass('animate')) {
-			this.queue(function(next, hooks) {
-				$(this).css('height', this.scrollHeight);
+		if (options && options.animateHeight && !element.classList.contains('animate')) {
+			fxq.queue(element, function(next, hooks) {
+				element.style.height = element.scrollHeight;
 
-				this.offsetHeight;
+				// force redraw
+				element.offsetHeight;
 
 				var timeout = setTimeout(next);
 
@@ -108,24 +122,26 @@ $.fn.extend({
 			});
 		}
 		
-		return this.queue(leave.start).queue(leave.finish);
+		fxq.queue(element, leave.start);
+		fxq.queue(element, leave.finish);
 	},
 
-	show: function(options) {
-		this.finish()
-			.queue(function(next) {
-				$(this).addClass('visible');
+	show: function(element, options) {
+		fxq.finish(element);
 
-				next();
-			});
+		fxq.queue(element, function(next) {
+			this.classList.add('visible');
 
-		return this.enter(null, options);
+			next();
+		});
+
+		this.enter(null, options);
 	},
 
-	hide: function(options) {
-
-		return this.leave(options, function() {
-			$(this).addClass('hidden').removeClass('visible');
+	hide: function(element, options) {
+		this.leave(element, options, function() {
+			this.classList.add('hidden');
+			this.classList.remove('visible');
 		});
 	}
-});
+};
