@@ -4,7 +4,11 @@
   "description": "Simplifies animating elements added or removed to the DOM. Greatly inspired by Angular's ngAnimate.",
   "main": "enter-leave.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf *.js",
+    "lint": "eslint src",
+    "build": "babel src --out-dir .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
@@ -26,6 +30,12 @@
   },
   "homepage": "https://github.com/lohfu/enter-leave",
   "dependencies": {
-    "fxq": "0.0.1"
+    "fxq": "github:lohfu/fxq"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "eslint": "^3.3.1",
+    "eslint-plugin-import": "^1.13.0",
+    "rimraf": "^2.5.4"
   }
 }
