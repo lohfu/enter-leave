@@ -1,10 +1,12 @@
+'use strict';
+
 /* Animate views */
 
-var transitionend = 'transitionend';
+const transitionend = 'transitionend';
 
-var fxq = require('fxq');
+const fxq = require('fxq');
 
-document.addEventListener(transitionend, function(e) {
+document.addEventListener(transitionend, function (e) {
   if (e.target.matches('.animate.active')) {
     e.stopPropagation();
     fxq.dequeue(e.target);
@@ -18,41 +20,41 @@ function transition(className, options, complete) {
   if (options.className)
     className += ' ' + options.className;
 
-  var stop;
+  let stop;
 
   return {
-    start: function(next, hooks) {
+    start(next, hooks) {
       hooks.stop = stop = animate.call(this, className, options);
     },
 
-    finish: function() {
+    finish() {
       if (complete) complete.call(this);
 
       stop();
 
       this.classList.remove('animate', 'active');
       this.style.height = '';
-      
+
       fxq.dequeue(this);
     }
   };
 }
 
 function animate(className, options) {
-  var self = this;
+  const self = this;
 
   this.classList.add.apply(this.classList, className.split(' ').concat('animate'));
 
   // force redraw
   this.offsetHeight;
 
-  var timeout = setTimeout(function() {
+  let timeout = setTimeout(function () {
     self.classList.add('active');
     //self.addClass('active');
 
-    var duration = parseFloat(window.getComputedStyle(self).getPropertyValue('transition-duration'));
+    const duration = parseFloat(window.getComputedStyle(self).getPropertyValue('transition-duration'));
 
-    timeout = setTimeout(function() {
+    timeout = setTimeout(function () {
       // finish animation if we are still waiting for transitionend
 
       //if (elem.is('.animate.active'))
@@ -61,7 +63,7 @@ function animate(className, options) {
     }, duration > 0 ? duration * 1100 : 0);
   });
 
-  return function() {
+  return function () {
     clearTimeout(timeout);
     // TODO maybe split(' ') and apply?
     self.classList.remove.apply(self.classList, className.split(' '));
@@ -71,19 +73,19 @@ function animate(className, options) {
 
 module.exports = {
 
-  toggle: function(options) {
-    if(this.hasClass('hidden') || this.hasClass('leave'))
+  toggle(options) {
+    if (this.hasClass('hidden') || this.hasClass('leave'))
       this.show(options);
-    else 
+    else
       this.hide(options);
   },
 
-  enter: function(element, targetElement, options, complete) {
+  enter(element, targetElement, options, complete) {
     options = options || {};
 
-    var enter = transition('enter', options, complete);
+    const enter = transition('enter', options, complete);
 
-    fxq.queue(element, function() {
+    fxq.queue(element, function () {
       // TODO implement different insertiong methods
       targetElement.appendChild(element);
 
@@ -94,13 +96,12 @@ module.exports = {
 
       enter.start.apply(element, arguments);
     });
-    
+
     fxq.queue(element, enter.finish);
   },
 
-  leave: function(element, options, complete) {
-
-    var leave = transition('leave', options, complete || function() {
+  leave(element, options, complete) {
+    const leave = transition('leave', options, complete || function () {
       // remove element when transition ends
       element.parentNode.removeChild(element);
     });
@@ -108,28 +109,28 @@ module.exports = {
     fxq.finish(element);
 
     if (options && options.animateHeight && !element.classList.contains('animate')) {
-      fxq.queue(element, function(next, hooks) {
+      fxq.queue(element, function (next, hooks) {
         element.style.height = element.scrollHeight;
 
         // force redraw
         element.offsetHeight;
 
-        var timeout = setTimeout(next);
+        const timeout = setTimeout(next);
 
-        hooks.stop = function() {
+        hooks.stop = function () {
           clearTimeout(timeout);
         };
       });
     }
-    
+
     fxq.queue(element, leave.start);
     fxq.queue(element, leave.finish);
   },
 
-  show: function(element, options) {
+  show(element, options) {
     fxq.finish(element);
 
-    fxq.queue(element, function(next) {
+    fxq.queue(element, function (next) {
       this.classList.add('visible');
 
       next();
@@ -138,8 +139,8 @@ module.exports = {
     this.enter(null, options);
   },
 
-  hide: function(element, options) {
-    this.leave(element, options, function() {
+  hide(element, options) {
+    this.leave(element, options, function () {
       this.classList.add('hidden');
       this.classList.remove('visible');
     });
