@@ -20,11 +20,11 @@ function transition(className, options, complete) {
 
   return {
     start(next, hooks) {
-      hooks.stop = stop = animate.call(this, className, options);
+      hooks.stop = stop = animate(this, className, options);
     },
 
     finish() {
-      if (complete) complete.call(this);
+      if (complete) complete(this);
 
       stop();
 
@@ -36,44 +36,44 @@ function transition(className, options, complete) {
   };
 }
 
-function animate(className, options) {
-  this.classList.add(...className.split(' '), 'animate');
+function animate(element, className, options) {
+  element.classList.add(...className.split(' '), 'animate');
 
   // force redraw
-  this.offsetHeight;
+  element.offsetHeight;
 
   let timeout = setTimeout(() => {
-    const duration = parseFloat(window.getComputedStyle(self).getPropertyValue('transition-duration'));
+    element.classList.add('active');
+
+    const duration = parseFloat(window.getComputedStyle(element).getPropertyValue('transition-duration'));
 
     timeout = setTimeout(() => {
       // finish animation if we are still waiting for transitionend
-
-      //if (elem.is('.animate.active'))
-      if (this.matches('.animate.active'))
-        fxq.dequeue(this);
+      if (element.matches('.animate.active'))
+        fxq.dequeue(element);
     }, duration > 0 ? duration * 1100 : 0);
   });
 
   return () => {
     clearTimeout(timeout);
     // TODO maybe split(' ') and apply?
-    this.classList.remove(...className.split(' '));
+    element.classList.remove(...className.split(' '));
   };
 }
 
 export function toggle(options) {
   if (this.hasClass('hidden') || this.hasClass('leave'))
-    this.show(options);
+    show(options);
   else
-    this.hide(options);
+    hide(options);
 }
 
 export function enter(element, targetElement, options, complete) {
   options = options || {};
 
-  const enter = transition('enter', options, complete);
+  const animation = transition('enter', options, complete);
 
-  fxq.queue(element, function () {
+  fxq.queue(element, function (...args) {
     // TODO implement different insertiong methods
     targetElement.appendChild(element);
 
@@ -82,14 +82,14 @@ export function enter(element, targetElement, options, complete) {
     if (options.animateHeight)
       element.style.height = element.scrollHeight;
 
-    enter.start.apply(element, arguments);
+    animation.start.apply(element, arguments);
   });
 
-  fxq.queue(element, enter.finish);
+  fxq.queue(element, animation.finish);
 }
 
 export function leave(element, options, complete) {
-  const leave = transition('leave', options, complete || function () {
+  const animation = transition('leave', options, complete || function () {
     // remove element when transition ends
     element.parentNode.removeChild(element);
   });
@@ -111,8 +111,8 @@ export function leave(element, options, complete) {
     });
   }
 
-  fxq.queue(element, leave.start);
-  fxq.queue(element, leave.finish);
+  fxq.queue(element, animation.start);
+  fxq.queue(element, animation.finish);
 }
 
 export function show(element, options) {
@@ -124,11 +124,11 @@ export function show(element, options) {
     next();
   });
 
-  this.enter(null, options);
+  enter(null, options);
 }
 
 export function hide(element, options) {
-  this.leave(element, options, function () {
+  leave(element, options, function () {
     this.classList.add('hidden');
     this.classList.remove('visible');
   });
