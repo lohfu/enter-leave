@@ -1,10 +1,6 @@
-'use strict';
-
-/* Animate views */
+import * as fxq from 'fxq';
 
 const transitionend = 'transitionend';
-
-const fxq = require('fxq');
 
 document.addEventListener(transitionend, function (e) {
   if (e.target.matches('.animate.active')) {
@@ -71,78 +67,75 @@ function animate(className, options) {
   };
 }
 
-module.exports = {
+export function toggle(options) {
+  if (this.hasClass('hidden') || this.hasClass('leave'))
+    this.show(options);
+  else
+    this.hide(options);
+}
 
-  toggle(options) {
-    if (this.hasClass('hidden') || this.hasClass('leave'))
-      this.show(options);
-    else
-      this.hide(options);
-  },
+export function enter(element, targetElement, options, complete) {
+  options = options || {};
 
-  enter(element, targetElement, options, complete) {
-    options = options || {};
+  const enter = transition('enter', options, complete);
 
-    const enter = transition('enter', options, complete);
+  fxq.queue(element, function () {
+    // TODO implement different insertiong methods
+    targetElement.appendChild(element);
 
-    fxq.queue(element, function () {
-      // TODO implement different insertiong methods
-      targetElement.appendChild(element);
+    element.classList.remove('hidden');
 
-      element.classList.remove('hidden');
+    if (options.animateHeight)
+      element.style.height = element.scrollHeight;
 
-      if (options.animateHeight)
-        element.style.height = element.scrollHeight;
+    enter.start.apply(element, arguments);
+  });
 
-      enter.start.apply(element, arguments);
-    });
+  fxq.queue(element, enter.finish);
+}
 
-    fxq.queue(element, enter.finish);
-  },
+export function leave(element, options, complete) {
+  const leave = transition('leave', options, complete || function () {
+    // remove element when transition ends
+    element.parentNode.removeChild(element);
+  });
 
-  leave(element, options, complete) {
-    const leave = transition('leave', options, complete || function () {
-      // remove element when transition ends
-      element.parentNode.removeChild(element);
-    });
+  fxq.finish(element);
 
-    fxq.finish(element);
+  if (options && options.animateHeight && !element.classList.contains('animate')) {
+    fxq.queue(element, function (next, hooks) {
+      element.style.height = element.scrollHeight;
 
-    if (options && options.animateHeight && !element.classList.contains('animate')) {
-      fxq.queue(element, function (next, hooks) {
-        element.style.height = element.scrollHeight;
+      // force redraw
+      element.offsetHeight;
 
-        // force redraw
-        element.offsetHeight;
+      const timeout = setTimeout(next);
 
-        const timeout = setTimeout(next);
-
-        hooks.stop = function () {
-          clearTimeout(timeout);
-        };
-      });
-    }
-
-    fxq.queue(element, leave.start);
-    fxq.queue(element, leave.finish);
-  },
-
-  show(element, options) {
-    fxq.finish(element);
-
-    fxq.queue(element, function (next) {
-      this.classList.add('visible');
-
-      next();
-    });
-
-    this.enter(null, options);
-  },
-
-  hide(element, options) {
-    this.leave(element, options, function () {
-      this.classList.add('hidden');
-      this.classList.remove('visible');
+      hooks.stop = function () {
+        clearTimeout(timeout);
+      };
     });
   }
-};
+
+  fxq.queue(element, leave.start);
+  fxq.queue(element, leave.finish);
+}
+
+export function show(element, options) {
+  fxq.finish(element);
+
+  fxq.queue(element, function (next) {
+    this.classList.add('visible');
+
+    next();
+  });
+
+  this.enter(null, options);
+}
+
+export function hide(element, options) {
+  this.leave(element, options, function () {
+    this.classList.add('hidden');
+    this.classList.remove('visible');
+  });
+}
