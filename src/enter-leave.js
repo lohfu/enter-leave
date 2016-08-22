@@ -37,33 +37,27 @@ function transition(className, options, complete) {
 }
 
 function animate(className, options) {
-  const self = this;
-
-  this.classList.add.apply(this.classList, className.split(' ').concat('animate'));
+  this.classList.add(...className.split(' '), 'animate');
 
   // force redraw
   this.offsetHeight;
 
-  let timeout = setTimeout(function () {
-    self.classList.add('active');
-    //self.addClass('active');
-
+  let timeout = setTimeout(() => {
     const duration = parseFloat(window.getComputedStyle(self).getPropertyValue('transition-duration'));
 
-    timeout = setTimeout(function () {
+    timeout = setTimeout(() => {
       // finish animation if we are still waiting for transitionend
 
       //if (elem.is('.animate.active'))
-      if (self.matches('.animate.active'))
-        fxq.dequeue(self);
+      if (this.matches('.animate.active'))
+        fxq.dequeue(this);
     }, duration > 0 ? duration * 1100 : 0);
   });
 
-  return function () {
+  return () => {
     clearTimeout(timeout);
     // TODO maybe split(' ') and apply?
-    self.classList.remove.apply(self.classList, className.split(' '));
-    //elem.removeClass(className);
+    this.classList.remove(...className.split(' '));
   };
 }
 
@@ -103,7 +97,7 @@ export function leave(element, options, complete) {
   fxq.finish(element);
 
   if (options && options.animateHeight && !element.classList.contains('animate')) {
-    fxq.queue(element, function (next, hooks) {
+    fxq.queue(element, (next, hooks) => {
       element.style.height = element.scrollHeight;
 
       // force redraw
@@ -111,7 +105,7 @@ export function leave(element, options, complete) {
 
       const timeout = setTimeout(next);
 
-      hooks.stop = function () {
+      hooks.stop = () => {
         clearTimeout(timeout);
       };
     });
