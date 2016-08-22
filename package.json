@@ -2,13 +2,16 @@
   "name": "enter-leave",
   "version": "0.1.0",
   "description": "Simplifies animating elements added or removed to the DOM. Greatly inspired by Angular's ngAnimate.",
-  "main": "enter-leave.js",
+  "main": "cjs/enter-leave.js",
+  "jsnext:main": "es/enter-leave.js",
   "scripts": {
     "clean": "rimraf *.js",
     "lint": "eslint src",
-    "build": "babel src --out-dir .",
+    "build": "npm run build:cjs && npm run build:es",
+    "build:cjs": "BABEL_ENV=cjs babel src --out-dir cjs",
+    "build:es": "BABEL_ENV=es babel src --out-dir es",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "npm run clean && npm run build"
+    "prepublish": "npm run clean && npm run lint && npm run build"
   },
   "repository": {
     "type": "git",

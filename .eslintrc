@@ -1,10 +1,6 @@
 {
 	"extends": "airbnb-base",
 
-	"parserOptions": {
-		"sourceType": "strict"
-	},
-
 	"rules": {
     "no-unused-expressions": 0,
     "no-underscore-dangle": 0,
@@ -31,18 +27,5 @@
 		"no-shadow": 0,
 		"spaced-comment": 0,
 		"strict": [ 2, "global" ]
-	},
-
-	globals: {
-		"$": true,
-		"_": true,
-		"ENV": true,
-		"google": true,
-		"INITIAL_STATE": true,
-		"INITIAL_CONTEXT": true,
-		"LOGIN_USER": true,
-		"PWD": true,
-		"FB": true,
-		"Backbone": true
 	}
 }
