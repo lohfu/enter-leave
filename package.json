@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/lohfu/enter-leave",
   "dependencies": {
-    "fxq": "github:lohfu/fxq"
+    "fxq": "0.0.2"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
