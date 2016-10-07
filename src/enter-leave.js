@@ -61,13 +61,6 @@ function animate(element, className, options) {
   };
 }
 
-export function toggle(options) {
-  if (this.hasClass('hidden') || this.hasClass('leave'))
-    show(options);
-  else
-    hide(options);
-}
-
 export function enter(element, targetElement, options, complete) {
   options = options || {};
 
@@ -115,21 +108,32 @@ export function leave(element, options, complete) {
   fxq.queue(element, animation.finish);
 }
 
+export function toggle(element, options) {
+  if (element.classList.contains('hidden') || element.classList.contains('leave'))
+    show(element, options);
+  else
+    hide(element, options);
+}
+
 export function show(element, options) {
+  if (element.classList.contains('visible')) return;
+
   fxq.finish(element);
 
   fxq.queue(element, function (next) {
-    this.classList.add('visible');
+    element.classList.add('visible');
 
     next();
   });
 
-  enter(null, options);
+  enter(element, null, options);
 }
 
 export function hide(element, options) {
+  if (element.classList.contains('hidden')) return;
+
   leave(element, options, function () {
-    this.classList.add('hidden');
-    this.classList.remove('visible');
+    element.classList.add('hidden');
+    element.classList.remove('visible');
   });
 }
