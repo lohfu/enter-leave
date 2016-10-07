@@ -68,7 +68,9 @@ export function enter(element, targetElement, options, complete) {
 
   fxq.queue(element, function (...args) {
     // TODO implement different insertiong methods
-    targetElement.appendChild(element);
+    if (targetElement) {
+      targetElement.appendChild(element);
+    }
 
     element.classList.remove('hidden');
 
