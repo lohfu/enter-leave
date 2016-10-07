@@ -1,6 +1,6 @@
 {
   "name": "enter-leave",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simplifies animating elements added or removed to the DOM. Greatly inspired by Angular's ngAnimate.",
   "main": "cjs/enter-leave.js",
   "jsnext:main": "es/enter-leave.js",
